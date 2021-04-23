@@ -1,0 +1,22 @@
+[package]
+name = "gmessage"
+version = "0.1.0"
+authors = ["gzbakku <gzbakku@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+gobject = { path = "../gobject" }
+tokio = { version = "1.5.0", features = ["full"] }
+tokio-io-timeout = "1.1.1"
+openssl = "0.10.33"
+rand = "0.8.3"
+mio = "0.7.11"
+futures = "0.3.14"
+
+# openssl = { version = "0.10", features = ["vendored"] }
+# [target.x86_64-pc-windows-msvc.dependencies]
+# openssl = "0.10.33"
+
+

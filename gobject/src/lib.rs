@@ -1,17 +1,20 @@
 
 pub mod build;
-mod value;
+pub mod value;
 mod common;
 pub mod parser;
+pub mod validater;
 
 pub use value::{gObject,gObjectValue};
 pub use common::Error;
 pub use parser::start as parse;
+pub use validater::{validate,gSchema,gSchemaValue};
+pub use parser::{Blocks,Block};
 
 #[cfg(test)]
 mod tests{
 
-    use crate::{gObjectValue,gObject,parse,Error};
+    use crate::{gObjectValue,gObject,parse,Error,gSchema,gSchemaValue};
 
     #[test]
     fn make_g_object_struct(){
@@ -61,6 +64,50 @@ mod tests{
 
         println!("macro_make : {:?}",macro_make);
 
+    }
+
+    #[test]
+    fn validate_gobject(){
+        let data = gObject!{
+            "name"=>gObjectValue::string("akku".to_string()),
+            "array"=>gObjectValue::array(vec![
+                gObjectValue::object(gObject!{
+                    "one"=>gObjectValue::i32(12),
+                    "two"=>gObjectValue::i64(12)
+                }),
+                gObjectValue::object(gObject!{
+                    "one"=>gObjectValue::i32(12),
+                    "two"=>gObjectValue::i64(12)
+                })
+            ]),
+            "bool"=>gObjectValue::bool(false),
+            "data"=>gObjectValue::object(gObject!{
+                "one"=>gObjectValue::i32(12),
+                "two"=>gObjectValue::i64(12),
+                "three"=>gObjectValue::i128(12)
+            }),
+            "bank"=>gObjectValue::object(gObject!{
+                "one"=>gObjectValue::i32(12),
+                "two"=>gObjectValue::i64(12)
+            })
+        };
+    
+        let schema = gSchema!{
+            "name"=>gSchemaValue::string,
+            "array"=>gSchemaValue::array_check(gSchema!{
+                "one"=>gSchemaValue::i32,
+                "two"=>gSchemaValue::i64
+            }),
+            "bool"=>gSchemaValue::bool,
+            "data"=>gSchemaValue::object_check(gSchema!{
+                "one"=>gSchemaValue::i32,
+                "two"=>gSchemaValue::i64,
+                "three"=>gSchemaValue::i128
+            }),
+            "bank"=>gSchemaValue::object
+        };
+    
+        println!("{:?}",schema.validate(&data));
     }
 
     #[test]

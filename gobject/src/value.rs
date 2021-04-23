@@ -8,7 +8,7 @@ macro_rules! gObject {
 
     ($($key:expr => $value:expr),* )=>{{
         use std::collections::HashMap;
-        use crate::value::{gObjectValue,gObject};
+        use gobject::value::{gObjectValue,gObject};
         let mut temp:HashMap<String,gObjectValue> = HashMap::new();
         $(temp.insert($key.to_string(),$value);)*
         gObject{map:temp}
@@ -79,8 +79,6 @@ macro_rules! gObject {
 
 }
 
-
-
 #[allow(non_camel_case_types,dead_code)]
 #[derive(Debug,Clone)]
 pub enum gObjectValue{
@@ -146,6 +144,13 @@ impl gObject{
             Some(v)=>{v},
             None=>{&gObjectValue::undefined}
         }
+    }
+    pub fn keys(&self) -> Vec<String>{
+        let mut collect = Vec::new();
+        for key in self.map.keys(){
+            collect.push(key.to_string());
+        }
+        return collect;
     }
 }
 

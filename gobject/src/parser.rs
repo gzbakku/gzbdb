@@ -11,6 +11,9 @@ pub struct Blocks{
 
 #[allow(dead_code)]
 impl Blocks{
+    pub fn len(&self) -> usize{
+        self.map.len()
+    }
     pub fn get(self)->Vec<gObjectValue>{
         let mut collect:Vec<gObjectValue> = Vec::new();
         for block in self.map{
@@ -50,6 +53,7 @@ impl Blocks{
 }
 
 pub fn start(pool:&Vec<u8>) -> Result<Blocks,Error>{
+
     match parse_group(&pool,true){
         Ok(v)=>{
             return Ok(Blocks{
@@ -114,8 +118,9 @@ pub fn parse_group(pool:&Vec<u8>,find_document:bool) -> Result<Vec<Block>,Error>
             }
             Err(v)=>{
                 // println!("{:?}",v);
-                println!("is_error");
+                // println!("is_error");
                 cursor = v.cursor;
+                // break;
             }
         }
         // if index == 10{break;}
@@ -320,7 +325,7 @@ pub fn read_block(pool:&Vec<u8>,start_cursor:usize,only_schema:bool) -> Result<B
     if get_flag_pos_8 == 0 || get_flag_pos_8 != (get_flag_pos_7 + data_len + 1 + 6){
         return Err(localError::new(
             Error!("invalid_schema=>not_found-valid-flag_8"),
-            start_cursor
+            get_flag_pos_7
         ));
     }
 
