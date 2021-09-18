@@ -101,6 +101,7 @@ pub enum gObjectValue{
 
 #[allow(dead_code)]
 impl gObjectValue{
+    
     pub fn string(&self) -> Option<String>{match self{gObjectValue::string(v)=>{Some(v.to_string())},_=>{None}}}
     pub fn array(&self) -> Option<Vec<gObjectValue>>{match self{gObjectValue::array(v)=>{Some(v.to_vec())},_=>{None}}}
     pub fn binary(&self) -> Option<Vec<u8>>{match self{gObjectValue::binary(v)=>{Some(v.to_vec())},_=>{None}}}
@@ -113,6 +114,22 @@ impl gObjectValue{
     pub fn u128(&self) -> Option<u128>{match self{gObjectValue::u128(v)=>{Some(v.clone())},_=>{None}}}
     pub fn f32(&self) -> Option<f32>{match self{gObjectValue::f32(v)=>{Some(v.clone())},_=>{None}}}
     pub fn f64(&self) -> Option<f64>{match self{gObjectValue::f64(v)=>{Some(v.clone())},_=>{None}}}
+    pub fn object(&self) -> Option<gObject>{match self{gObjectValue::object(v)=>{Some(v.clone())},_=>{None}}}
+    
+    pub fn unchecked_string(self)->String{match self{gObjectValue::string(v)=>{v},_=>{String::new()}}}
+    pub fn unchecked_array(self)->Vec<gObjectValue>{match self{gObjectValue::array(v)=>{v},_=>{Vec::new()}}}
+    pub fn unchecked_binary(self)->Vec<u8>{match self{gObjectValue::binary(v)=>{v},_=>{Vec::new()}}}
+    pub fn unchecked_bool(self)->bool{match self{gObjectValue::bool(v)=>{v},_=>{false}}}
+    pub fn unchecked_i32(self)->i32{match self{gObjectValue::i32(v)=>{v},_=>{0}}}
+    pub fn unchecked_i64(self)->i64{match self{gObjectValue::i64(v)=>{v},_=>{0}}}
+    pub fn unchecked_i128(self)->i128{match self{gObjectValue::i128(v)=>{v},_=>{0}}}
+    pub fn unchecked_u32(self)->u32{match self{gObjectValue::u32(v)=>{v},_=>{0}}}
+    pub fn unchecked_u64(self)->u64{match self{gObjectValue::u64(v)=>{v},_=>{0}}}
+    pub fn unchecked_u128(self)->u128{match self{gObjectValue::u128(v)=>{v},_=>{0}}}
+    pub fn unchecked_f32(self)->f32{match self{gObjectValue::f32(v)=>{v},_=>{0.0}}}
+    pub fn unchecked_f64(self)->f64{match self{gObjectValue::f64(v)=>{v},_=>{0.0}}}
+    pub fn unchecked_object(self)->gObject{match self{gObjectValue::object(v)=>{v},_=>{gObject::new()}}}
+
 }
 
 #[allow(non_camel_case_types)]
@@ -127,6 +144,9 @@ use crate::build;
 impl gObject{
     pub fn build(self) -> Vec<u8>{
         return build::start(self);
+    }
+    pub fn build_with_hash(self) -> Vec<u8>{
+        return build::start_with_hash(self);
     }
     pub fn new() -> gObject{
         gObject{

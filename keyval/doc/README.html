@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <title>Keyval</title>
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+    <h1 class="title">Keyval</h1>
+    <nav id="TOC"><ul>
+<li><a href="#keyval-structure">0.1 KeyVal Structure</a><ul></ul></li>
+<li><a href="#corruption-handling">0.2 Corruption Handling</a><ul></ul></li>
+<li><a href="#example">0.3 Example</a><ul></ul></li></ul></nav><p>this is a file based key value store, it can add delete and update key value pairs in a file, you have to ensure all transactions to the Map are atomic i suggest you use mutex to get atomic handle on file before updating the map.</p>
+<h2 id="keyval-structure" class="section-header"><a href="#keyval-structure">0.1 KeyVal Structure</a></h2>
+<p>this is a binary structre of a data frame, data frame is a key value pair in u8 binary.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="ident">start_flag</span> <span class="op">-</span> [<span class="number">0</span>,<span class="number">1</span>,<span class="number">0</span>];
+<span class="ident">key_Size_int</span> <span class="op">=</span> [<span class="number">0</span>,<span class="number">8</span>];
+<span class="ident">key_Size</span> <span class="op">=</span> [<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">3</span>];
+<span class="ident">key</span> <span class="op">=</span> [<span class="number">0</span>,<span class="number">111</span>,<span class="number">101</span>,<span class="number">89</span>];
+<span class="ident">data_type_int</span> <span class="op">=</span> [<span class="number">0</span>,<span class="number">3</span>];
+<span class="ident">Value_Size_int</span> <span class="op">=</span> [<span class="number">0</span>,<span class="number">8</span>];
+<span class="ident">value_Size</span> <span class="op">=</span> [<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">3</span>];
+<span class="ident">value</span> <span class="op">=</span> [<span class="number">0</span>,<span class="number">112</span>,<span class="number">113</span>,<span class="number">114</span>];
+<span class="ident">end_flag</span> <span class="op">=</span> [<span class="number">0</span>,<span class="number">2</span>,<span class="number">0</span>];
+
+<span class="ident">full_frame</span> <span class="op">=</span> [
+    <span class="number">0</span>,<span class="number">1</span>,<span class="number">0</span>,                  <span class="comment">//start_flag</span>
+    <span class="number">0</span>,<span class="number">8</span>,                    <span class="comment">//key_Size_int</span>
+    <span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">3</span>,      <span class="comment">//key_Size</span>
+    <span class="number">0</span>,<span class="number">111</span>,<span class="number">101</span>,<span class="number">89</span>,           <span class="comment">//key</span>
+    <span class="number">0</span>,<span class="number">3</span>,                    <span class="comment">//data_type_int</span>
+    <span class="number">0</span>,<span class="number">8</span>,                    <span class="comment">//Value_Size_int</span>
+    <span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">3</span>,      <span class="comment">//value_Size</span>
+    <span class="number">0</span>,<span class="number">112</span>,<span class="number">113</span>,<span class="number">114</span>           <span class="comment">//value</span>
+    <span class="number">0</span>,<span class="number">2</span>,<span class="number">0</span>                   <span class="comment">//end_flag</span>
+];</pre></div>
+<h2 id="corruption-handling" class="section-header"><a href="#corruption-handling">0.2 Corruption Handling</a></h2>
+<p>data corruption is handled via frame spaces and flags cases where data can be curropted are if flags are folllowed by a [0,1] pair or if a transaction is blocked when new frame is written and old frame is not started to get removed from file space. In case of transaction halt if data was being written previous data frame will remain valid or if the new frame was written and old frame was being removed new frame will be enabled and old frame will become corropt.</p>
+<h2 id="example" class="section-header"><a href="#example">0.3 Example</a></h2>
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+
+<span class="comment">//open map</span>
+<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">map1</span>:<span class="ident">Map</span>;
+<span class="kw">match</span> <span class="ident">Map</span>::<span class="ident">ensure</span>(<span class="ident">dir</span>,<span class="ident">file_name</span>){
+    <span class="prelude-val">Ok</span>(<span class="ident">v</span>)<span class="op">=</span><span class="op">&gt;</span>{<span class="ident">map1</span> <span class="op">=</span> <span class="ident">v</span>;},
+    <span class="prelude-val">Err</span>(<span class="ident">e</span>)<span class="op">=</span><span class="op">&gt;</span>{
+        <span class="macro">println</span><span class="macro">!</span>(<span class="string">&quot;map ensure failed =&gt; {:?}&quot;</span>,<span class="ident">e</span>);
+        <span class="kw">return</span>;
+    }
+}
+
+<span class="comment">//add</span>
+<span class="ident">map1</span>.<span class="ident">add</span>(<span class="string">&quot;name&quot;</span>,<span class="ident">Value</span>::<span class="ident">String</span>(<span class="string">&quot;KING Akku&quot;</span>.<span class="ident">to_string</span>()),<span class="bool-val">false</span>).<span class="ident">unwrap</span>();
+<span class="comment">//update</span>
+<span class="ident">map1</span>.<span class="ident">add</span>(<span class="string">&quot;name&quot;</span>,<span class="ident">Value</span>::<span class="ident">String</span>(<span class="string">&quot;Emperor Akku&quot;</span>.<span class="ident">to_string</span>()),<span class="bool-val">false</span>).<span class="ident">unwrap</span>();
+<span class="comment">//read</span>
+<span class="macro">println</span><span class="macro">!</span>(<span class="string">&quot;\nname : {:?}&quot;</span>,<span class="ident">map1</span>.<span class="ident">read</span>(<span class="string">&quot;name&quot;</span>));
+<span class="comment">//delete</span>
+<span class="ident">map1</span>.<span class="ident">delete</span>(<span class="string">&quot;name&quot;</span>).<span class="ident">unwrap</span>();
+</pre></div>
+
+    
+</body>
+</html>

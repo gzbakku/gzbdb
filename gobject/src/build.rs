@@ -1,12 +1,12 @@
 
 /*
     000 1 000 -  id len bytes num
-    000 2 000 -  id len
-    000 3 000 -  id
-    000 4 000 - data type
-    000 5 000 - data len bytes num
-    000 6 000 - data length
-    000 7 000 - data
+    000 2 000 -  id len is length of an string converted to a bytes array represented in kb(f64 int)
+    000 3 000 -  id is a string of len parsed in 2 flag
+    000 4 000 -  data type
+    000 5 000 -  data len bytes num
+    000 6 000 -  data len is length of a array of bytes represented in kb(f64 int)
+    000 7 000 -  data
     000 8 000
 */
 
@@ -14,6 +14,14 @@ use crate::value::{gObject,gObjectValue};
 use md5;
 
 pub fn start(obj:gObject) -> Vec<u8>{
+    let body = parse_object_body(obj);
+    let mut make:Vec<u8> = Vec::new();
+    make.extend(&make_item("hash",&gObjectValue::header("".to_string())));
+    make.extend(&make_item("body",&gObjectValue::body(body)));
+    return make_item("gObject Document Schema : v1",&gObjectValue::document(make));
+}
+
+pub fn start_with_hash(obj:gObject) -> Vec<u8>{
     let body = parse_object_body(obj);
     let hash = format!("{:x}",md5::compute(&body));
     let mut make:Vec<u8> = Vec::new();

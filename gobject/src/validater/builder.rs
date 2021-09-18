@@ -123,8 +123,8 @@ pub struct gSchema{
     pub map:HashMap<String,gSchemaValue>
 }
 
-use crate::validater::validate as validate_func;
-use crate::{Error,gObject};
+use crate::validater::{validate as validate_func,validate_value};
+use crate::{Error,gObject,gObjectValue};
 
 #[allow(dead_code)]
 impl gSchema{
@@ -141,6 +141,9 @@ impl gSchema{
     }
     pub fn validate(&self,object:&gObject) -> Result<(),Error>{
         validate_func(&self,&object)
+    }
+    pub fn validate_value(&self,value:&gObjectValue) -> Result<(),Error>{
+        validate_value(&self,&value)
     }
     pub fn keys(&self) -> Vec<String>{
         let mut collect = Vec::new();

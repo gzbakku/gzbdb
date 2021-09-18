@@ -37,17 +37,17 @@ impl Encrypted{
             "cipher"=>gSchemaValue::binary
         }.validate(&o){
             Ok(_)=>{
-                let iv:Vec<u8>;
                 match &o["iv"]{
-                    gObjectValue::binary(v)=>{iv = v.clone();}
+                    gObjectValue::binary(iv)=>{
+                        match &o["cipher"]{
+                            gObjectValue::binary(cipher)=>{
+                                return Ok(Encrypted{iv:iv.clone(),cipher:cipher.clone()});
+                            }
+                            _=>{return Err(Error!("invalid-value-cipher"));}
+                        }
+                    }
                     _=>{return Err(Error!("invalid-value-iv"));}
                 }
-                let cipher:Vec<u8>;
-                match &o["cipher"]{
-                    gObjectValue::binary(v)=>{cipher = v.clone();}
-                    _=>{return Err(Error!("invalid-value-cipher"));}
-                }
-                Ok(Encrypted{iv:iv,cipher:cipher})
             },
             Err(_)=>{
                 return Err(Error!("invalid-schema"));

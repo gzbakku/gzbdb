@@ -1,9 +1,49 @@
 use tokio;
-use gmessage::client;
+use gmessage::{v3};
 use gobject::{gObject};
 
-#[tokio::main]
-async fn main(){
+use std::time::Instant;
+// use tokio::time::sleep;
+use futures::future::join_all;
+// use std::time::Duration;
+
+// #[tokio::main]
+
+use v3::client;
+
+use tokio::runtime::{Builder,Runtime};
+
+pub fn main(){
+
+    let builder = Builder::new_multi_thread()
+    .worker_threads(50)
+    .thread_name("client listener")
+    // .enable_all()
+    .enable_io()
+    .enable_time()
+    .thread_stack_size(32 * 1024 * 1024)
+    .build();
+
+    let runtime:Runtime;
+    match builder{
+        Ok(v)=>{runtime = v;},
+        Err(_)=>{return}
+    }
+
+    // for _ in 0..1{
+    //     runtime.spawn(async {
+    //         start().await
+    //     });
+    // }
+
+    runtime.block_on(async {
+        start().await;
+    });
+
+}
+
+
+async fn start() {
 
     let addr = "127.0.0.1:1200".to_string();
     let keys_dir = "D:/workstation/expo/rust/gzbdb/keys";
@@ -18,23 +58,66 @@ async fn main(){
 
     let config = client::ClientConfig::new(auth_token,addr);
     
-    let mut conn:client::Client;
+    let conn:client::RequestBuilder;
     match client::start(config).await{
-        Ok(v)=>{conn = v;},
+        Ok(v)=>{
+            conn = v;
+        },
         Err(_)=>{return}
     }
 
-    for _ in 0..1{
-        match conn.send(gObject!{
+    // println!("client connected");
+
+    let started_at = Instant::now();
+
+    let mut collect = Vec::new(); 
+
+    for _ in 0..1000{
+        collect.push(runner(&conn));
+    }
+
+    println!("sent");
+
+    /*
+    
+        //simple
+        1       = 115 128
+        10      = 431
+        100     = 4833
+        1000    = 55069
+
+        //async
+        1       = 112
+        10      = 168
+        100     = 859
+        1000    = 3419
+        10000   = 39874
+
+    */
+
+    async fn runner(b:&client::RequestBuilder){
+        // let id: String = rand::thread_rng()
+        // .sample_iter(&Alphanumeric)
+        // .take(7)
+        // .map(char::from)
+        // .collect();
+        let timeout:u64 = 30000;
+        match b.send(gObject!{
             "non"=>gObjectValue::null
-        },3000,true){
-            Ok(r)=>{
-                println!("{:?}",r);
+        },timeout,false).await{
+            Ok(_r)=>{
+                // println!("completed : {:?}",id);
+                // println!("c : {:?}",_r.request_id);
             },
-            Err(e)=>{
-                println!("e : {:?}",e);
+            Err(_e)=>{
+                println!("e : {:?}",_e);
             }
         }
     }
-    
+
+    println!("{:?}",join_all(collect).await.len());
+    println!("time : {:?}",started_at.elapsed().as_millis());
+
+    // sleep(Duration::from_secs(100)).await
+
 }

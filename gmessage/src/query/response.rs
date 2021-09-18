@@ -32,7 +32,7 @@ impl Response{
             data:ResponseType::Ok
         }
     }
-    pub fn body(req:&Request,d:gObject)->Response{
+    pub fn data(req:&Request,d:gObject)->Response{
         Response{
             channel_id:req.channel_id.clone(),
             request_id:req.request_id.clone(),

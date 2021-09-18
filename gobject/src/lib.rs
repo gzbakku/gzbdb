@@ -4,12 +4,14 @@ pub mod value;
 mod common;
 pub mod parser;
 pub mod validater;
+pub mod reader;
 
 pub use value::{gObject,gObjectValue};
 pub use common::Error;
 pub use parser::start as parse;
 pub use validater::{validate,gSchema,gSchemaValue};
 pub use parser::{Blocks,Block};
+pub use reader::{gObjectReader,gObjectReaderStatus};
 
 #[cfg(test)]
 mod tests{

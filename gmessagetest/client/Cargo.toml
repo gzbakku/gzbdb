@@ -10,3 +10,4 @@ edition = "2018"
 gobject = { path = "../../gobject" }
 gmessage = { path = "../../gmessage" }
 tokio = { version = "1.5.0", features = ["full"] }
+futures = "0.3.14"

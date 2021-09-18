@@ -8,6 +8,20 @@ pub use builder::{gSchema,gSchemaValue};
 
 use crate::{gObject,Error,gObjectValue};
 
+pub fn validate_value(schema:&gSchema,object:&gObjectValue) -> Result<(),Error>{
+    match object{
+        gObjectValue::object(v)=>{
+            match validate(&schema,&v){
+                Ok(_)=>{return Ok(());},
+                Err(e)=>{return Err(e);}
+            }
+        },
+        _=>{
+            return Err(Error!("not_object"));
+        }
+    }
+}
+
 pub fn validate(schema:&gSchema,object:&gObject) -> Result<(),Error>{
 
     for key in schema.keys() {
