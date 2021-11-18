@@ -28,7 +28,9 @@ mod myio;
 mod map;
 mod parse;
 mod mapify;
+mod common;
 
+pub use common::Error;
 pub use map::{Map,Value};
 pub use mapify::{
     DataFrame,
