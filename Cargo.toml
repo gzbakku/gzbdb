@@ -1,3 +1,3 @@
 [workspace]
 
-members = ["keyval","bucket","actor_tester","actor","gobject","gmessage","gmessagetest/server","gmessagetest/client","iobox","utils"]
+members = ["messageQue","keyval","bucket","actor_tester","actor","gobject","gmessage","gmessagetest/server","gmessagetest/client","iobox","utils"]
